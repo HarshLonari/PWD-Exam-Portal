@@ -1,42 +1,61 @@
-# CEA Departmental Exam Practice Website
+# CEA Exam Portal (MERN)
 
-A complete, responsive MCQ examination website for preparing for the Maharashtra PWD Civil Engineering Assistant (CEA) departmental examination. Built with React, TypeScript, Vite, and Tailwind CSS.
+The deployable application is split into two independent projects:
 
-## Features
+- `frontend/` — React, TypeScript, and Vite. Deploy this folder to Vercel.
+- `backend/` — Express, TypeScript, and MongoDB (Mongoose). Deploy this folder to Render.
 
-- **Subject Selection Dashboard**: View your progress and select a subject.
-- **Configurable Test**: Choose test mode (Full, Practice, Custom), number of questions, duration, shuffling options, and negative marking.
-- **Real Examination Interface**: Timer, question palette, mark for review, clear response, and immediate auto-saving.
-- **Scoring Engine**: Calculates total marks, percentage, accuracy, and factors in negative marking (if enabled).
-- **Result & Answer Review**: Detailed result summary and the ability to review correct/incorrect answers.
-- **Test History**: Local persistence of test history and performance analytics.
+The existing exam experience is retained, with username/email login, separate employee and admin login selection, employee registration, password visibility toggles, username recovery by email, password reset by email, role-protected admin question validation, and per-account test history.
 
-## Installation & Running Locally
+## Run locally
 
-1. Ensure you have Node.js installed.
-2. In the project root, run:
-   ```bash
-   npm install
-   ```
-3. Start the development server:
-   ```bash
-   npm run dev
-   ```
-4. Open the application in your browser (usually `http://localhost:5173`).
+Use two terminals from the repository root:
 
-## Data Import Pipeline
+```bash
+cd backend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
 
-This project includes a Python script (`extract_pdfplumber.py`) to parse tabular questions directly from the original PDFs and convert them into structured JSON files located in `src/data/`.
+Set the values in `backend/.env` (see below), then in the second terminal:
 
-### Adding more subjects and question PDFs later:
+```bash
+cd frontend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
 
-1. Place the new PDF inside the `questionsssss` folder.
-2. Ensure the filename matches the subject map in `extract_pdfplumber.py` (e.g., `_GCE_`, `_Maths_APM_`).
-3. Run the Python extraction script:
-   ```bash
-   pip install pdfplumber PyMuPDF
-   python extract_pdfplumber.py
-   ```
-4. A validation report will be updated at `src/data/validation_report.md` detailing extraction accuracy, missing data, and items requiring manual review.
+Open the Vite URL shown in the frontend terminal. Before the first run, seed the MongoDB question bank from `backend/` with `npm run seed`.
 
-*Note: Some PDFs contain diagrams that cannot be cleanly parsed to text. These questions are flagged for manual review in the validation report.*
+## Backend environment
+
+Set these values in `backend/.env` locally and in Render's environment settings:
+
+- `MONGODB_URI` — MongoDB Atlas connection string.
+- `JWT_SECRET` and `JWT_REFRESH_SECRET` — two different, long random secrets.
+- `ADMIN_SECRET_CODE` — a private value used when creating an admin account. Never put this value in the frontend environment.
+- `CLIENT_URL` — comma-separated allowed frontend origins, such as `http://localhost:5173,https://your-app.vercel.app`.
+- `FRONTEND_URL` — the frontend origin used to create password-reset links.
+- `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, `EMAIL_PASS`, and optionally `EMAIL_FROM` — SMTP settings. These are required for username recovery and password reset email delivery.
+
+## Deploy
+
+### Render (backend)
+
+Create a Web Service from this repository with root directory `backend`. Use build command `npm install && npm run build` and start command `npm start`. Add the backend environment values above, setting `CLIENT_URL` to your Vercel URL and `FRONTEND_URL` to that same URL. After deployment, seed questions once using Render's shell with `npm run seed` from the service root.
+
+The backend exposes `GET /health` for a health check.
+
+### Vercel (frontend)
+
+Create a Vercel project from this repository and set root directory `frontend`. Vercel will use the included Vite configuration. Add `VITE_API_URL` with the full Render service URL, for example `https://your-service.onrender.com` (no trailing slash), then deploy.
+
+Update Render's `CLIENT_URL` and `FRONTEND_URL` to the final Vercel domain. If using a Vercel preview domain, add it to `CLIENT_URL` as well when you need preview deployments to call the API.
+
+## Question bank
+
+The source JSON remains in `backend/data/` for seeding and in `frontend/src/data/` for the admin editor's local tooling. `backend/data/` is the seed source for separate Render deployment. Static source page and diagram images are copied into `frontend/public/pdf_pages/` so image references continue to work on Vercel.
+
+The PDF extraction utilities and source PDFs remain in the repository for future question-bank updates.
