@@ -5,6 +5,58 @@ import { useAuth } from '../../context/AuthContext';
 
 type Role = 'employee' | 'admin';
 
+type InputFieldProps = {
+  id: string;
+  label: string;
+  type?: string;
+  value: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  error?: string;
+  autoComplete?: string;
+  rightElement?: React.ReactNode;
+};
+
+const InputField: React.FC<InputFieldProps> = ({
+  id, label, type = 'text', value, placeholder, onChange, error: fieldError, autoComplete, rightElement,
+}) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-semibold text-slate-700 mb-2">
+      {label}
+    </label>
+    <div className="relative">
+      <input
+        id={id}
+        type={type}
+        value={value}
+        autoComplete={autoComplete}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={`input-field ${rightElement ? 'pr-12' : ''} ${fieldError ? 'input-field-error' : ''}`}
+      />
+      {rightElement && (
+        <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
+      )}
+    </div>
+    {fieldError && (
+      <p className="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
+        <AlertCircle className="w-3.5 h-3.5" /> {fieldError}
+      </p>
+    )}
+  </div>
+);
+
+const EyeButton: React.FC<{ show: boolean; toggle: () => void }> = ({ show, toggle }) => (
+  <button
+    type="button"
+    onClick={toggle}
+    aria-label={show ? 'Hide password' : 'Show password'}
+    className="text-slate-400 hover:text-slate-600 transition-colors p-1"
+  >
+    {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+  </button>
+);
+
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -81,50 +133,6 @@ const RegisterPage: React.FC = () => {
       setLoading(false);
     }
   };
-
-  const InputField = ({
-    id, label, type = 'text', value, placeholder, onChange, error: fieldError, autoComplete,
-    rightElement,
-  }: {
-    id: string; label: string; type?: string; value: string; placeholder: string;
-    onChange: (v: string) => void; error?: string; autoComplete?: string;
-    rightElement?: React.ReactNode;
-  }) => (
-    <div>
-      <label htmlFor={id} className="block text-sm font-semibold text-slate-700 mb-2">
-        {label}
-      </label>
-      <div className="relative">
-        <input
-          id={id}
-          type={type}
-          value={value}
-          autoComplete={autoComplete}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={`input-field ${rightElement ? 'pr-12' : ''} ${fieldError ? 'input-field-error' : ''}`}
-        />
-        {rightElement && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">{rightElement}</div>
-        )}
-      </div>
-      {fieldError && (
-        <p className="mt-1.5 text-xs text-red-500 font-medium flex items-center gap-1">
-          <AlertCircle className="w-3.5 h-3.5" /> {fieldError}
-        </p>
-      )}
-    </div>
-  );
-
-  const EyeButton = ({ show, toggle }: { show: boolean; toggle: () => void }) => (
-    <button
-      type="button"
-      onClick={toggle}
-      className="text-slate-400 hover:text-slate-600 transition-colors p-1"
-    >
-      {show ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-    </button>
-  );
 
   return (
     <div className="min-h-screen flex">
